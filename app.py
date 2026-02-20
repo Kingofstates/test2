@@ -7,6 +7,8 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
+RENDER_URL = "https://test2-1o72.onrender.com"
+
 DATA_FILE = "users.txt"
 
 app = Flask(__name__)
@@ -43,6 +45,8 @@ def visit():
 
     return {"status": "invalid"}
 
+application = ApplicationBuilder().token(BOT_TOKEN).build()
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     token = generate_token()
@@ -51,12 +55,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     link = f"https://kingofstates.github.io/test/?id={token}"
     await context.bot.send_message(chat_id=chat_id, text=f"Your private link:\n{link}")
 
-def run_bot():
-    app_bot = ApplicationBuilder().token(BOT_TOKEN).build()
-    app_bot.add_handler(CommandHandler("start", start))
-    app_bot.run_polling()
+application.add_handler(CommandHandler("start", start))
+
+@app.route(f"/{BOT_TOKEN}", methods=["POST"])
+async def webhook():
+    update = Update.de_json(request.get_json(force=True), application.bot)
+    await application.process_update(update)
+    return "ok"
+
+@app.route("/")
+def home():
+    return "Bot is running ✔️"
 
 if __name__ == "__main__":
-    import threading
-    threading.Thread(target=run_bot).start()
+    application.bot.set_webhook(f"{RENDER_URL}/{BOT_TOKEN}")
     app.run(host="0.0.0.0", port=10000)
