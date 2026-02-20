@@ -6,7 +6,7 @@ from flask import Flask, request
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-BOT_TOKEN = os.environ.get("8335451744:AAFdHaNTmePzoznm4nf81nHCKiUpi7zG0kA")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 DATA_FILE = "users.txt"
 
 app = Flask(__name__)
